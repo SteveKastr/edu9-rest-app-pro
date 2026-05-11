@@ -1,0 +1,23 @@
+package gr.aueb.cf.edu9app.repository;
+
+import gr.aueb.cf.edu9app.model.User;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface UserRepository extends JpaRepository<User, Long>,
+        JpaSpecificationExecutor<User> {
+
+    Optional<User> findByUuid(UUID uuid);
+
+    @EntityGraph(attributePaths = {"role", "role.capabilities"})
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByUuidAndDeletedFalse(UUID uuid);
+    Optional<User> findByUsernameAndDeletedFalse(String username);
+
+
+}
