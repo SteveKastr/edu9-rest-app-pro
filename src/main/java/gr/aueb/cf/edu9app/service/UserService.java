@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Service
-@Slf4j // TODO add login
+@Slf4j
 @RequiredArgsConstructor
 public class UserService implements IUserService{
 
