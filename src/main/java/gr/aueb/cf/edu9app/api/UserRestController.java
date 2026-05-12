@@ -2,6 +2,7 @@ package gr.aueb.cf.edu9app.api;
 
 import gr.aueb.cf.edu9app.core.exception.EntityAlreadyExistsException;
 import gr.aueb.cf.edu9app.core.exception.EntityInvalidArgumentException;
+import gr.aueb.cf.edu9app.core.exception.EntityNotFoundException;
 import gr.aueb.cf.edu9app.core.exception.ValidationException;
 import gr.aueb.cf.edu9app.dto.UserInsertDTO;
 import gr.aueb.cf.edu9app.dto.UserReadOnlyDTO;
@@ -10,13 +11,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -43,6 +42,14 @@ public class UserRestController {
                .buildAndExpand(userReadOnlyDTO.uuid()).toUri();
 
         return ResponseEntity.created(location).body(userReadOnlyDTO);
+
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<UserReadOnlyDTO> getUserByUUID(@PathVariable UUID uuid)
+        throws EntityNotFoundException {
+
+        return ResponseEntity.ok(userService.getUserByUUIDDeletedFalse(uuid));
 
     }
 }
