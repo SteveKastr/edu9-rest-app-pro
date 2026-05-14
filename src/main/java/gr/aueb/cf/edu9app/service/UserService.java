@@ -1,8 +1,8 @@
 package gr.aueb.cf.edu9app.service;
 
-import gr.aueb.cf.edu9app.core.exception.EntityAlreadyExistsException;
-import gr.aueb.cf.edu9app.core.exception.EntityInvalidArgumentException;
-import gr.aueb.cf.edu9app.core.exception.EntityNotFoundException;
+import gr.aueb.cf.edu9app.core.exceptions.EntityAlreadyExistsException;
+import gr.aueb.cf.edu9app.core.exceptions.EntityInvalidArgumentException;
+import gr.aueb.cf.edu9app.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.edu9app.dto.UserInsertDTO;
 import gr.aueb.cf.edu9app.dto.UserReadOnlyDTO;
 import gr.aueb.cf.edu9app.mapper.Mapper;
