@@ -1,4 +1,4 @@
-package gr.aueb.cf.edu9app.core.exception;
+package gr.aueb.cf.edu9app.core.exceptions;
 
 import lombok.Getter;
 import org.springframework.validation.BindingResult;

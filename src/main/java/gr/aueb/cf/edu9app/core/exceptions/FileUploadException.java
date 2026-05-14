@@ -1,4 +1,4 @@
-package gr.aueb.cf.edu9app.core.exception;
+package gr.aueb.cf.edu9app.core.exceptions;
 
 public class FileUploadException extends AppGenericException {
     private static final String DEFAULT_CODE = "FileUploadError";
