@@ -1,13 +1,18 @@
 package gr.aueb.cf.edu9app.api;
 
 import gr.aueb.cf.edu9app.core.exceptions.*;
+import gr.aueb.cf.edu9app.core.filters.TeacherFilters;
 import gr.aueb.cf.edu9app.dto.TeacherInsertDTO;
 import gr.aueb.cf.edu9app.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
+import gr.aueb.cf.edu9app.model.Teacher;
 import gr.aueb.cf.edu9app.service.ITeacherService;
 import gr.aueb.cf.edu9app.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +78,21 @@ public class TeacherRestController {
         }
 
         TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.updateTeacher(teacherUpdateDTO);
+        return ResponseEntity.ok(teacherReadOnlyDTO);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<TeacherReadOnlyDTO>> getFilteredAndPaginatedTeachers(
+            @PageableDefault(page = 0, size = 5) Pageable pageable, @ModelAttribute TeacherFilters filters
+            ) throws EntityNotFoundException {
+        Page<TeacherReadOnlyDTO> paginatedDTO = teacherService.getTeachersPaginatedFiltered(pageable, filters);
+        return ResponseEntity.ok(paginatedDTO);
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<TeacherReadOnlyDTO> getTeacherByUUID(@PathVariable UUID uuid)
+        throws  EntityNotFoundException {
+        TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.getTeacherByUUIDDeletedFalse(uuid);
         return ResponseEntity.ok(teacherReadOnlyDTO);
     }
 }
