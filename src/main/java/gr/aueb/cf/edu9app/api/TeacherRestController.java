@@ -3,6 +3,7 @@ package gr.aueb.cf.edu9app.api;
 import gr.aueb.cf.edu9app.core.exceptions.*;
 import gr.aueb.cf.edu9app.dto.TeacherInsertDTO;
 import gr.aueb.cf.edu9app.dto.TeacherReadOnlyDTO;
+import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
 import gr.aueb.cf.edu9app.service.ITeacherService;
 import gr.aueb.cf.edu9app.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
@@ -56,5 +57,22 @@ public class TeacherRestController {
     throws EntityNotFoundException, FileUploadException {
         teacherService.saveAmkaFile(uuid, amkaFile);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{uuid}")
+    public ResponseEntity<TeacherReadOnlyDTO> updateTeacher(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody TeacherUpdateDTO teacherUpdateDTO,
+            BindingResult bindingResult) throws EntityAlreadyExistsException,
+            EntityInvalidArgumentException, ValidationException, EntityNotFoundException {
+
+        //teacherUpdateValidator.validate(teacherUpdateDTO, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("Teacher", "Invalid teacher data", bindingResult);
+        }
+
+        TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.updateTeacher(teacherUpdateDTO);
+        return ResponseEntity.ok(teacherReadOnlyDTO);
     }
 }
