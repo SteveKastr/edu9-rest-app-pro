@@ -8,6 +8,7 @@ import gr.aueb.cf.edu9app.core.exceptions.FileUploadException;
 //import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
 import gr.aueb.cf.edu9app.dto.TeacherInsertDTO;
 import gr.aueb.cf.edu9app.dto.TeacherReadOnlyDTO;
+import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,8 +26,8 @@ public interface ITeacherService {
     void saveAmkaFile(UUID uuid, MultipartFile amkaFile)
             throws FileUploadException, EntityNotFoundException;
 
-//    TeacherReadOnlyDTO updateTeacher(TeacherUpdateDTO teacherUpdateDTO)
-//            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException;
+    TeacherReadOnlyDTO updateTeacher(TeacherUpdateDTO teacherUpdateDTO)
+            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException;
 
     TeacherReadOnlyDTO deleteTeacherByUUID(UUID uuid) throws EntityNotFoundException;
 

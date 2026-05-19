@@ -6,9 +6,9 @@ import gr.aueb.cf.edu9app.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.edu9app.core.exceptions.FileUploadException;
 //import gr.aueb.cf.edu9app.core.filters.Paginated;
 //import gr.aueb.cf.edu9app.core.filters.TeacherFilters;
-//import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
 import gr.aueb.cf.edu9app.dto.TeacherInsertDTO;
 import gr.aueb.cf.edu9app.dto.TeacherReadOnlyDTO;
+import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
 import gr.aueb.cf.edu9app.mapper.Mapper;
 import gr.aueb.cf.edu9app.model.*;
 import gr.aueb.cf.edu9app.model.static_data.Region;
@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service                        // IoC Container
@@ -128,56 +129,56 @@ public class TeacherServiceImpl implements ITeacherService {
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
     }
 
-//    @Override
-//    @PreAuthorize("hasAuthority('EDIT_TEACHER')")
-//    @Transactional(rollbackFor = { EntityNotFoundException.class, EntityAlreadyExistsException.class, EntityInvalidArgumentException.class} )
-//    public TeacherReadOnlyDTO updateTeacher(TeacherUpdateDTO dto)
-//            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
-//        try {
-//            Teacher teacher = teacherRepository.findByUuid(dto.uuid())
-//                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher with uuid=" + dto.uuid() + " not found"));
-//
-//            teacher.setFirstname(dto.firstname());
-//            teacher.setLastname(dto.lastname());
-//
-//            if (!teacher.getVat().equals(dto.vat())) {
-//                if (teacherRepository.findByVat(dto.vat()).isPresent()) {
-//                    throw new EntityAlreadyExistsException("","Teacher with vat=" + dto.vat() + " already exists");
-//                }
-//                teacher.setVat(dto.vat());
-//            }
-//
-//            if (!teacher.getPersonalInfo().getIdentityNumber().equals(dto.personalInfoUpdateDTO().identityNumber()) &&
-//                    personalInfoRepository.findByIdentityNumber(dto.personalInfoUpdateDTO().identityNumber()).isPresent()) {
-//                throw new EntityAlreadyExistsException("Teacher", "Teacher with identity number " + dto.personalInfoUpdateDTO().identityNumber() + " already exists");
-//            }
-//
-//            if (!Objects.equals(dto.regionId(), teacher.getRegion().getId())) {
-//                Region region = regionRepository.findById(dto.regionId())
-//                        .orElseThrow(() -> new EntityInvalidArgumentException("Region","Region id=" + dto.regionId() + " invalid"));
-//                Region oldRegion = teacher.getRegion();
-//                if (oldRegion != null) {
-//                    oldRegion.removeTeacher(teacher);
-//                }
-//                region.addTeacher(teacher);
-//            }
-//            // user username and password updated TODO
-//            // other features to be updated TODO
-//
-//            teacherRepository.save(teacher);    // προαιρετικό
-//            log.info("Teacher with uuid={} updated successfully", dto.uuid());
-//            return mapper.mapToTeacherReadOnlyDTO(teacher);
-//        } catch (EntityNotFoundException e) {
-//            log.error("Update failed for teacher with uuid={}. Teacher not found", dto.uuid(), e);
-//            throw e;
-//        } catch (EntityAlreadyExistsException e) {
-//            log.error("Update failed for teacher with uuid={}. Teacher with vat={} already exists", dto.uuid(), dto.vat(), e);
-//            throw e;
-//        } catch (EntityInvalidArgumentException e) {
-//            log.error("Update failed for teacher with uuid={}. Region id={} invalid", dto.uuid(), dto.regionId(), e);
-//            throw e;
-//        }
-//    }
+    @Override
+    @PreAuthorize("hasAuthority('EDIT_TEACHER')")
+    @Transactional(rollbackFor = { EntityNotFoundException.class, EntityAlreadyExistsException.class, EntityInvalidArgumentException.class} )
+    public TeacherReadOnlyDTO updateTeacher(TeacherUpdateDTO dto)
+            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
+        try {
+            Teacher teacher = teacherRepository.findByUuid(dto.uuid())
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher", "Teacher with uuid=" + dto.uuid() + " not found"));
+
+            teacher.setFirstname(dto.firstname());
+            teacher.setLastname(dto.lastname());
+
+            if (!teacher.getVat().equals(dto.vat())) {
+                if (teacherRepository.findByVat(dto.vat()).isPresent()) {
+                    throw new EntityAlreadyExistsException("","Teacher with vat=" + dto.vat() + " already exists");
+                }
+                teacher.setVat(dto.vat());
+            }
+
+            if (!teacher.getPersonalInfo().getIdentityNumber().equals(dto.personalInfoUpdateDTO().identityNumber()) &&
+                    personalInfoRepository.findByIdentityNumber(dto.personalInfoUpdateDTO().identityNumber()).isPresent()) {
+                throw new EntityAlreadyExistsException("Teacher", "Teacher with identity number " + dto.personalInfoUpdateDTO().identityNumber() + " already exists");
+            }
+
+            if (!Objects.equals(dto.regionId(), teacher.getRegion().getId())) {
+                Region region = regionRepository.findById(dto.regionId())
+                        .orElseThrow(() -> new EntityInvalidArgumentException("Region","Region id=" + dto.regionId() + " invalid"));
+                Region oldRegion = teacher.getRegion();
+                if (oldRegion != null) {
+                    oldRegion.removeTeacher(teacher);
+                }
+                region.addTeacher(teacher);
+            }
+            // user username and password updated TODO
+            // other features to be updated TODO
+
+            teacherRepository.save(teacher);    // προαιρετικό
+            log.info("Teacher with uuid={} updated successfully", dto.uuid());
+            return mapper.mapToTeacherReadOnlyDTO(teacher);
+        } catch (EntityNotFoundException e) {
+            log.error("Update failed for teacher with uuid={}. Teacher not found", dto.uuid(), e);
+            throw e;
+        } catch (EntityAlreadyExistsException e) {
+            log.error("Update failed for teacher with uuid={}. Teacher with vat={} already exists", dto.uuid(), dto.vat(), e);
+            throw e;
+        } catch (EntityInvalidArgumentException e) {
+            log.error("Update failed for teacher with uuid={}. Region id={} invalid", dto.uuid(), dto.regionId(), e);
+            throw e;
+        }
+    }
 
     @Override
     @PreAuthorize("hasAuthority('DELETE_TEACHER')")
@@ -291,29 +292,6 @@ public class TeacherServiceImpl implements ITeacherService {
         }
     }
 
-//    public void saveAmkaFile(PersonalInfo personalInfo, MultipartFile amkaFile)
-//            throws IOException {
-//
-//        String originalFilename = amkaFile.getOriginalFilename();
-//        String savedName = UUID.randomUUID().toString() + getFileExtension(originalFilename);
-//
-//        String uploadDirectory = "uploads/";
-//        Path filePath = Paths.get(uploadDirectory + savedName);
-//
-//        Files.createDirectories(filePath.getParent());
-////        Files.write(filePath, amkaFile.getBytes());
-//        amkaFile.transferTo(filePath);  // safe for large files, more efficient
-//
-//        Attachment attachment = new Attachment();
-//        attachment.setFilename(originalFilename);
-//        attachment.setSavedName(savedName);
-//        attachment.setFilePath(filePath.toString());
-//        attachment.setContentType(amkaFile.getContentType());
-//        attachment.setExtension(getFileExtension(originalFilename));
-//
-//        personalInfo.setAmkaFile(attachment);
-//        log.info("Attachment for teacher with amka={} saved", personalInfo.getAmka());
-//    }
 
 
 //    @Override
