@@ -2,12 +2,16 @@ package gr.aueb.cf.edu9app.api;
 
 import gr.aueb.cf.edu9app.core.exceptions.*;
 import gr.aueb.cf.edu9app.core.filters.TeacherFilters;
-import gr.aueb.cf.edu9app.dto.TeacherInsertDTO;
-import gr.aueb.cf.edu9app.dto.TeacherReadOnlyDTO;
-import gr.aueb.cf.edu9app.dto.TeacherUpdateDTO;
+import gr.aueb.cf.edu9app.dto.*;
 import gr.aueb.cf.edu9app.model.Teacher;
 import gr.aueb.cf.edu9app.service.ITeacherService;
 import gr.aueb.cf.edu9app.validator.TeacherInsertValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +34,30 @@ public class TeacherRestController {
     private final ITeacherService teacherService;
     private final TeacherInsertValidator teacherInsertValidator;
 
+
+
+    @Operation(
+            summary = "Save a teacher",
+            description = "Registers a new teacher in the system"
+    )
+    @ApiResponses ({
+            @ApiResponse(
+                    responseCode = "201", description = "Teacher created",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherReadOnlyDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409", description = "Teacher already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500", description = "Internal Server Error",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400", description = "Validation error",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponseDTO.class))
+            )
+    })
     @PostMapping
     public ResponseEntity<TeacherReadOnlyDTO> saveTeacher(
             @Valid @RequestBody TeacherInsertDTO teacherInsertDTO,
@@ -55,6 +83,33 @@ public class TeacherRestController {
                 .body(teacherReadOnlyDTO);
     }
 
+
+    @Operation(
+            summary = "Upload AMKA file for a teacher",
+            description = "Uploads a teacher's AMKA document file. Replaces existing file if present."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "File uploaded successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Teacher not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "File upload failed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @PostMapping("/{uuid}/amka-file")
     public ResponseEntity<Void> uploadAmkaFile(
             @PathVariable UUID uuid,
@@ -64,6 +119,38 @@ public class TeacherRestController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @Operation(summary = "Update a teacher")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200", description = "Teacher updated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherReadOnlyDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409", description = "Teacher already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Teacher not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500", description = "Internal Server Error",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400", description = "Validation error",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401", description = "Not Authenticated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403", description = "Access Denied",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            )
+    })
     @PutMapping("/{uuid}")
     public ResponseEntity<TeacherReadOnlyDTO> updateTeacher(
             @PathVariable UUID uuid,
@@ -81,6 +168,23 @@ public class TeacherRestController {
         return ResponseEntity.ok(teacherReadOnlyDTO);
     }
 
+
+
+    @Operation(summary = "Get all teachers paginated and filtered")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200", description = "Teachers returned",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401", description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403", description = "Access Denied",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     @GetMapping
     public ResponseEntity<Page<TeacherReadOnlyDTO>> getFilteredAndPaginatedTeachers(
             @PageableDefault(page = 0, size = 5) Pageable pageable, @ModelAttribute TeacherFilters filters
@@ -89,10 +193,60 @@ public class TeacherRestController {
         return ResponseEntity.ok(paginatedDTO);
     }
 
+
+
+    @Operation(summary = "Get one teacher by uuid")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200", description = "Teacher returned",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = TeacherReadOnlyDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404", description = "Teacher not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401", description = "Not Authenticated",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403", description = "Access Denied",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            )
+    })
     @GetMapping("/{uuid}")
     public ResponseEntity<TeacherReadOnlyDTO> getTeacherByUUID(@PathVariable UUID uuid)
         throws  EntityNotFoundException {
         TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.getTeacherByUUIDDeletedFalse(uuid);
+        return ResponseEntity.ok(teacherReadOnlyDTO);
+    }
+
+
+
+    @Operation(summary = "Deletes a teacher. It is a soft-delete design pattern.")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200", description = "Teacher deleted",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404", description = "Teacher not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401", description = "Unauthorized",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403", description = "Access Denied",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<TeacherReadOnlyDTO> deleteTeacherByUUID(@PathVariable UUID uuid)
+            throws  EntityNotFoundException {
+        TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.deleteTeacherByUUID(uuid);
         return ResponseEntity.ok(teacherReadOnlyDTO);
     }
 }

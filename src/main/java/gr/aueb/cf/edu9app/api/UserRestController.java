@@ -4,12 +4,21 @@ import gr.aueb.cf.edu9app.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.edu9app.core.exceptions.EntityInvalidArgumentException;
 import gr.aueb.cf.edu9app.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.edu9app.core.exceptions.ValidationException;
+import gr.aueb.cf.edu9app.dto.ErrorResponseDTO;
 import gr.aueb.cf.edu9app.dto.UserInsertDTO;
 import gr.aueb.cf.edu9app.dto.UserReadOnlyDTO;
+import gr.aueb.cf.edu9app.dto.ValidationErrorResponseDTO;
 import gr.aueb.cf.edu9app.service.IUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,6 +32,45 @@ import java.util.UUID;
 public class UserRestController {
 
     private final IUserService userService;
+
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new user account in the system."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserReadOnlyDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error",
+                    content = @Content(
+                          mediaType = "application/json",
+                          schema = @Schema(implementation = ValidationErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "User already exists",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
 
     @PostMapping
     public ResponseEntity<UserReadOnlyDTO> registerUser(@Valid @RequestBody UserInsertDTO userInsertDTO,
@@ -45,6 +93,30 @@ public class UserRestController {
 
     }
 
+
+    @Operation(
+            summary = "Get user by UUID",
+            description = "Retrieves a non-deleted user by their UUID."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserReadOnlyDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/{uuid}")
     public ResponseEntity<UserReadOnlyDTO> getUserByUUID(@PathVariable UUID uuid)
         throws EntityNotFoundException {
